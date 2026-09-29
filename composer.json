@@ -1,0 +1,33 @@
+{
+    "name": "nathanrice/wp-cli-prompts",
+    "description": "POC: interactive TUI for WP-CLI using Laravel Prompts",
+    "type": "wp-cli-package",
+    "license": "MIT",
+    "require": {
+        "php": "^8.1",
+        "laravel/prompts": "^0.3"
+    },
+    "require-dev": {
+        "wp-cli/wp-cli-bundle": "^2.12"
+    },
+    "autoload": {
+        "psr-4": {
+            "WP_CLI\\Prompts\\": "src/"
+        },
+        "files": [
+            "command.php"
+        ]
+    },
+    "extra": {
+        "commands": [
+            "plugin install-wizard",
+            "user wizard"
+        ]
+    },
+    "config": {
+        "platform": {
+            "php": "8.1.0"
+        }
+    },
+    "homepage": "https://github.com/nathanrice/wp-cli-prompts"
+}

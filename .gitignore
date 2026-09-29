@@ -1,0 +1,4 @@
+vendor/
+local-bootstrap.php
+wp-cli.yml
+.DS_Store
