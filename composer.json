@@ -21,7 +21,8 @@
     "extra": {
         "commands": [
             "plugin install-wizard",
-            "user wizard"
+            "user wizard",
+            "new"
         ]
     },
     "config": {

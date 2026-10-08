@@ -130,6 +130,7 @@ if ( null === $wp_cli_prompts_fallback_reason ) {
 
 	WP_CLI::add_command( 'plugin install-wizard', 'WP_CLI\Prompts\Plugin_Install_Command' );
 	WP_CLI::add_command( 'user wizard', 'WP_CLI\Prompts\User_Wizard_Command' );
+	WP_CLI::add_command( 'new', 'WP_CLI\Prompts\New_Command' );
 
 	return;
 }
@@ -139,8 +140,10 @@ define( 'WP_CLI_PROMPTS_FALLBACK_REASON', $wp_cli_prompts_fallback_reason );
 
 require_once __DIR__ . '/src/BaseCommand.php';
 require_once __DIR__ . '/src/User_Wizard_Fallback_Command.php';
+require_once __DIR__ . '/src/New_Fallback_Command.php';
 
 WP_CLI::add_command( 'user wizard', 'WP_CLI\Prompts\User_Wizard_Fallback_Command' );
+WP_CLI::add_command( 'new', 'WP_CLI\Prompts\New_Fallback_Command' );
 
 // Registered anyway so the user gets a reason, not "not a registered subcommand".
 // A live search-then-select flow has no sensible line-by-line equivalent.

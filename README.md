@@ -3,8 +3,16 @@
 A proof of concept: what would a modern, interactive terminal UI for WP-CLI
 look like, built on [Laravel Prompts](https://github.com/laravel/prompts)?
 
-Two commands:
+Three commands:
 
+- `wp new` — guided setup of a brand-new site, in three phases that each
+  ask, summarize, confirm, and run before the next begins: (1) download
+  WordPress; (2) create `wp-config.php` and the database, install, and create
+  the admin account (a generated password is shown right then); (3) add
+  plugins (multi-select search of the wp.org directory), a theme, and a few
+  common extras. It never overwrites an existing install, resumes a
+  half-finished setup from whichever phase is incomplete, and on an installed
+  site offers phase 3 (plugins and theme) only.
 - `wp plugin install-wizard` — search the wp.org plugin directory, see plugin
   details, and install (with optional activation) via a live spinner.
 - `wp user wizard` — a validated form for creating a WordPress user: username,
@@ -145,6 +153,15 @@ Verified: fallback end-to-end on the 2.12 phar under PHP 8.3 and 8.1
 password prompt), and the PHP-version trigger by raising the floor in a
 copy. Not verified on an actual PHP < 8.1 binary.
 
+### `wp new` fallback
+
+When Laravel Prompts can't run, `wp new` falls back to WP-CLI's own
+`--prompt` flag: it runs `core download` (after a y/n), `config create
+--prompt=dbname,dbuser,dbpass,dbhost,dbprefix`, then `core install
+--prompt=url,title,admin_user,admin_password,admin_email`, skipping whatever is
+already in place. There is no database creation, plugin or theme step, and no
+summary. The database must already exist.
+
 ## Requirements
 
 - **WP-CLI 3.0 nightly** for the full UI. On 2.12.x (including Homebrew
@@ -200,7 +217,7 @@ resolved in the same dependency tree as Laravel Prompts so nothing collides.
 It doesn't depend on whichever `wp` you have installed. Pass
 `--require=./command.php --path=/path/to/wordpress`.
 
-Both commands (and the fallback) require a real terminal (TTY). Piping stdin
+All three commands (and their fallbacks) require a real terminal (TTY). Piping stdin
 (e.g. in a script or CI) produces a clean WP-CLI error rather than an
 interactive-prompt stack trace.
 
@@ -221,6 +238,18 @@ interactive-prompt stack trace.
   the OS process table. Fine for a local POC demo; not acceptable for
   anything beyond that. A real implementation should use WP-CLI's STDIN
   password-prompt convention instead.
+- `wp new` runs `core install` and everything after it in a fresh `wp`
+  process (WordPress can't be loaded into the running one), so the admin
+  password is briefly on that process's command line. The database password is
+  not: `config create` runs in-process.
+- `wp new` creates the database with mysqli, not `wp db create`: that command
+  needs wp-config constants that don't exist yet.
+- `core install` itself probes the site URL for pretty permalinks and waits for
+  each request to time out when the domain doesn't resolve (about 35 s for an
+  unresolvable name). That's WordPress, not this package.
+- Search prompts call the wp.org API on every keystroke, synchronously.
+- On WP-CLI 2.12 with PHP's default 128M memory limit, `core download` itself
+  can run out of memory while extracting. The fallback hits this too.
 - No handling for wp.org API rate limiting or network failures beyond an
   empty result set.
 - Minimal error handling generally — this optimizes for demonstrating the

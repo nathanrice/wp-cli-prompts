@@ -31,6 +31,26 @@ abstract class BaseCommand {
 		Prompt::interactive( true );
 	}
 
+	/**
+	 * The directory WordPress lives in, or would be created in. For `before_wp_load`
+	 * commands: ABSPATH is set from `--path`/cwd even when no site exists there yet.
+	 */
+	protected function target_dir(): string {
+		return rtrim( defined( 'ABSPATH' ) ? ABSPATH : getcwd(), '/\\' );
+	}
+
+	/**
+	 * Wp-config.php may sit one directory above the WordPress root, as WordPress allows.
+	 */
+	protected function has_wp_config( string $dir ): bool {
+		return is_file( $dir . '/wp-config.php' )
+			|| ( is_file( dirname( $dir ) . '/wp-config.php' ) && ! is_file( dirname( $dir ) . '/wp-settings.php' ) );
+	}
+
+	protected function has_wp_files( string $dir ): bool {
+		return is_file( $dir . '/wp-load.php' ) && is_file( $dir . '/wp-includes/version.php' );
+	}
+
 	protected function validate_username( string $value ): ?string {
 		if ( strlen( $value ) < 3 ) {
 			return 'Username must be at least 3 characters.';
